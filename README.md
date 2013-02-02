@@ -1,5 +1,5 @@
-Pysysu
-======
+python utils
+============
 
 compress_text.py
 ----------------
