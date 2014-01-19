@@ -50,7 +50,6 @@ def main():
                                 print(srcfile)
                                 log.write(srcfile + "\n")
                                 audio = FLAC(srcfile)
-                                print(audio.tags)
                                 try:
                                         artist = slugify(audio.tags['ARTIST'][0]) # caratteri strani vengono rimossi
                                         artist_dir = os.path.normpath(os.path.join(dest_dir,artist))
@@ -83,6 +82,12 @@ def main():
                                         #se il file non ha un titolo uso il vecchio nome del file come titolo
                                         title = os.path.splitext(filename)[0]
                                 track_path = os.path.join(album_dir,track + title + ".flac")
+                                if os.path.exists(os.path.normpath(os.path.join(os.path.dirname(srcfile),"cover.jpg"))) and not os.path.exists(os.path.normpath(os.path.join(album_dir,"cover.jpg"))):
+                                      try:
+                                         log.write("Copying cover...\n")
+                                         shutil.copy(os.path.normpath(os.path.join(os.path.dirname(srcfile),"cover.jpg")),os.path.normpath(os.path.join(album_dir,"cover.jpg")))
+                                      except:
+                                         log.write("Error copying cover\n")
                                 if os.path.exists(track_path):
                                         if md5Checksum(srcfile) == md5Checksum(track_path):
                                                 continue
@@ -95,5 +100,8 @@ def main():
                                         assert md5Checksum(srcfile) == md5Checksum(track_path) #controllo che il file copiato sia uguale a quello originale
                                 except AssertionError:
                                         log.write("ERROR: " + srcfile + " md5 differs from " + track_path +"'s md5" + "\n")
+
+                                      
+
 if __name__ == "__main__":
 	main()
