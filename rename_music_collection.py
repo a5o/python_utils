@@ -11,6 +11,11 @@ import os,sys,shutil,hashlib,unicodedata,re
 import os.path
 import fnmatch
 import time
+
+if sys.argv[1] in ["-f","--fast"]:
+   fast = True
+else:
+   fast = False
  
 def timestamp():
    now = time.time()
@@ -89,16 +94,19 @@ def main():
                                       except:
                                          log.write("Error copying cover\n")
                                 if os.path.exists(track_path):
-                                        if md5Checksum(srcfile) == md5Checksum(track_path):
+                                        if fast:
+                                           continue
+                                        elif md5Checksum(srcfile) == md5Checksum(track_path):
                                                 continue
                                 log.write("Copying file " + srcfile + " to " + track_path + "\n")
                                 try:
                                         shutil.copy(srcfile,track_path)
                                 except (IOError, os.error) as why:
                                         log.write("ERROR: Could not copy "  + srcfile + " to " + track_path + " " + str(why) + "\n")
-                                try:
+                                if not fast:
+                                   try:
                                         assert md5Checksum(srcfile) == md5Checksum(track_path) #controllo che il file copiato sia uguale a quello originale
-                                except AssertionError:
+                                   except AssertionError:
                                         log.write("ERROR: " + srcfile + " md5 differs from " + track_path +"'s md5" + "\n")
 
                                       
