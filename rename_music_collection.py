@@ -3,15 +3,19 @@
 #configuration
 source_dir = "Z:"
 dest_dir="Z:/collection"
-logfile = "Z:/collection/rename.log"
+logfile_prefix = "Z:/collection/rename"
 #end of configuration
 
 from mutagen.flac import FLAC
 import os,sys,shutil,hashlib,unicodedata,re
 import os.path
 import fnmatch
-
-log = open(os.path.normpath(logfile),"w+")
+import time
+ 
+def timestamp():
+   now = time.time()
+   localtime = time.localtime(now)
+   return time.strftime('%Y%m%d%H%M%S', localtime)
 
 def fixpath(p):
         return os.path.normpath(p) + os.sep
@@ -36,6 +40,7 @@ def slugify(value):
         return value
 
 def main():
+        log = open(os.path.normpath(logfile_prefix + "_" + timestamp() + ".log"),"w+")
 	for root,dirs,files in os.walk(source_dir):
 		for filename in files:
 			srcfile=os.path.normpath(os.path.join(root,filename))
@@ -78,21 +83,17 @@ def main():
                                         #se il file non ha un titolo uso il vecchio nome del file come titolo
                                         title = os.path.splitext(filename)[0]
                                 track_path = os.path.join(album_dir,track + title + ".flac")
-                                if not os.path.exists(track_path):
-                                        try:
-                                                log.write("Copying file " + srcfile + " to " + track_path + "\n")
-                                        except UnicodeDecodeError:
-                                                log.write("Copying file " + srcfile.decode('ascii') + " to " + track_path + "\n")
-                                        try:
-                                                shutil.copy(srcfile,track_path)
-                                        except (IOError, os.error) as why:
-                                                 log.write("ERROR: Could not copy "  + srcfile + " to " + track_path + " " + str(why) + "\n")
-                                        try:
-                                                assert md5Checksum(srcfile) == md5Checksum(track_path) #controllo che il file copiato sia uguale a quello originale
-                                        except AssertionError:
-                                                try:
-                                                        log.write("ERROR: " + srcfile + " md5 differs from " + track_path +"'s md5" + "\n")
-                                                except UnicodeDecoreError:
-                                                        log.write("ERROR: " + slugify(srcfile) + " md5 differs from " + track_path +"'s md5" + "\n")
+                                if os.path.exists(track_path):
+                                        if md5Checksum(srcfile) == md5Checksum(track_path):
+                                                continue
+                                log.write("Copying file " + srcfile + " to " + track_path + "\n")
+                                try:
+                                        shutil.copy(srcfile,track_path)
+                                except (IOError, os.error) as why:
+                                        log.write("ERROR: Could not copy "  + srcfile + " to " + track_path + " " + str(why) + "\n")
+                                try:
+                                        assert md5Checksum(srcfile) == md5Checksum(track_path) #controllo che il file copiato sia uguale a quello originale
+                                except AssertionError:
+                                        log.write("ERROR: " + srcfile + " md5 differs from " + track_path +"'s md5" + "\n")
 if __name__ == "__main__":
 	main()
