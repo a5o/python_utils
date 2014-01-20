@@ -12,10 +12,11 @@ import os.path
 import fnmatch
 import time
 
-if sys.argv[1] in ["-f","--fast"]:
-   fast = True
-else:
-   fast = False
+if sys.argv[1:]:
+   if sys.argv[1] in ["-f","--fast"]:
+      fast = True
+   else:
+      fast = False
  
 def timestamp():
    now = time.time()
