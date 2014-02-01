@@ -81,7 +81,11 @@ def main():
 			if fnmatch.fnmatch(srcfile,"*.flac"):
                                 #print("Checking " + srcfile + "...")
                                 log.write("Checking " + srcfile + "...\n")
-                                audio = FLAC(srcfile)
+                                try:
+                                   audio = FLAC(srcfile)
+                                except IOError:
+                                   log.write("ERROR: Could not read FLAC file " + srcfile + "...\n")
+                                   continue
                                 try:
                                         artist = slugify(audio.tags['ARTIST'][0]) # caratteri strani vengono rimossi
                                         artist_dir = os.path.normpath(os.path.join(dest_dir,artist))
